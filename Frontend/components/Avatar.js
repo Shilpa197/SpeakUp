@@ -1,42 +1,13 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Image, Animated, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Image, StyleSheet } from 'react-native';
 
 const Avatar = ({ source }) => {
-  const animatedValue = useRef(new Animated.Value(0)).current;
-  const imageRef = useRef(null);
-
-  useEffect(() => {
-    const animate = () => {
-      Animated.timing(animatedValue, {
-        toValue: 1,
-        duration: 1000, // Change this to adjust the speed of the animation
-        useNativeDriver: false,
-      }).start(() => {
-        // Reset the animation
-        animatedValue.setValue(0);
-        animate();
-      });
-    };
-
-    animate();
-  }, []);
-
   return (
     <View style={styles.avatarContainer}>
       <Image
-        ref={imageRef}
-        source={source}
+        source={require('../assets/samp1.jpg')}
         onError={(error) => console.log("Error loading image:", error)}
-        style={{
-          transform: [
-            {
-              scale: animatedValue.interpolate({
-                inputRange: [0, 1],
-                outputRange: [1, 1.2],
-              }),
-            },
-          ],
-        }}
+        style={styles.avatar}
       />
     </View>
   );
@@ -55,6 +26,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1,
+  },
+  avatar: {
+    //borderRadius: 15,
+    borderTopLeftRadius: 150, // use a fixed value instead of percentage
+    borderTopRightRadius: 150,
+    borderBottomRightRadius: 150,
+    borderBottomLeftRadius: 150,
+    width: 301, // set the width of the image
+    height: 301, // set the height of the image
   },
 });
 

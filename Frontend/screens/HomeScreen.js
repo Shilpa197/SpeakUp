@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,76 +7,53 @@ import {
   TouchableOpacity,
   Image,
   Linking,
-  Animated,
 } from "react-native";
-import React, { useLayoutEffect, useState, } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, DrawerActions } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Avatar from "../components/Avatar";
-
-
+import SideMenu from "../components/SideMenu";
+import * as Font from "expo-font";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
-  }, []);
+
+    loadFonts();
+  }, [navigation]);
 
   const handleMenuPress = () => {
     setMenuOpen(!menuOpen);
+    navigation.dispatch(DrawerActions.toggleDrawer());
   };
 
-  const handleMenuClose = () => {
-    setMenuOpen(false);
-  };
-
-  const ProfileInfo = () => {
-    return (
-      <View style={styles.profileContainer}>
-        <Image
-          style={styles.profileImage}
-          source={require("../assets/profile.png")}
-        />
-        <Text style={styles.profileName}>John Doe</Text>
-      </View>
-    );
-  };
-
-  function handleAccountLink() {
+  const handleAccountLink = () => {
     const url = "/";
     Linking.openURL(url);
-  }
+  };
 
   const handleLogout = () => {
     // Perform logout logic here
     console.log("User logged out");
   };
 
-  const TalkingImage = ({ source }) => {
-    const animatedValue = useRef(new Animated.Value(0)).current;
-    const imageRef = useRef(null);
-  
-    useEffect(() => {
-      const animate = () => {
-        Animated.timing(animatedValue, {
-          toValue: 1,
-          duration: 1000, // Change this to adjust the speed of the animation
-          useNativeDriver: false,
-        }).start(() => {
-          // Reset the animation
-          animatedValue.setValue(0);
-          animate();
-        });
-      };
-  
-      animate();
-    }, []);
-  
+  async function loadFonts() {
+    await Font.loadAsync({
+      "Righteous-Regular": require("../assets/font/Righteous-Regular.ttf"),
+      // Add more custom fonts if needed
+    });
+    setFontsLoaded(true);
+  }
+
+  if (!fontsLoaded) {
+    return null; // Or a loading screen
+  }
 
   return (
     <ImageBackground
@@ -89,42 +67,35 @@ const HomeScreen = () => {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>SpeakUp</Text>
         </View>
-        {menuOpen && (
-          <View style={styles.sideMenu}>
-            <View style={styles.sideMenuHeader}>
-              <ProfileInfo />
-              <TouchableOpacity onPress={handleMenuClose}>
-                <Text style={styles.closeIcon}>X</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Ionicons name="person-circle-outline" size={30}></Ionicons>
-              <TouchableOpacity onPress={handleAccountLink}>
-                <Text style={styles.sideMenuItem}>My Account</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Ionicons name="log-out-outline" size={30}></Ionicons>
-              <TouchableOpacity onPress={handleLogout}>
-                <Text style={styles.sideMenuItem}>Logout</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
       </SafeAreaView>
-       <Avatar /> 
+      <Avatar />
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="trash-outline" size={30} color="black" />
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => {
+            // Handle trash button click
+          }}
+        >
+          <Ionicons name="trash-outline" size={30} style={styles.icon} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="mic-outline" size={50} color="black" />
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => {
+            // Handle mic button click
+          }}
+        >
+          <Ionicons name="mic-outline" size={50} style={styles.icon} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="send-outline" size={30} color="black" />
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => {
+            // Handle send button click
+          }}
+        >
+          <Ionicons name="send-outline" size={30} style={styles.icon} />
         </TouchableOpacity>
       </View>
+      {menuOpen ? <SideMenu /> : null}
     </ImageBackground>
   );
 };
@@ -133,17 +104,15 @@ const styles = StyleSheet.create({
   safeAreaContainer: {
     flex: 1,
   },
-  tex: {
-    color: "white",
-  },
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
   },
   headerTitle: {
+    fontFamily: "Righteous-Regular",
     color: "white",
-    fontSize: 18,
+    fontSize: 30,
     marginLeft: 10,
   },
   menuIcon: {
@@ -155,66 +124,11 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: "cover",
   },
-  
-
-  sideMenu: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    bottom: 0,
-    width: "70%",
-    backgroundColor: "#d3daeb",
-    padding: 16,
-  },
-  sideMenuHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  sideMenuTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: "white",
-  },
-  sideMenuItem: {
-    fontSize: 16,
-    marginBottom: 8,
-    marginLeft: 10,
-  },
-  profileContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  profileImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    marginRight: 10,
-  },
-  profileName: {
-    color: "white",
-    fontSize: 16,
-  },
-  closeButton: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    padding: 5,
-  },
-  closeButtonIcon: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
   bottomBar: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingBottom: 16,
-    //borderTopWidth: 1,
-    //borderTopColor: '#ECECEC',
   },
   actionButton: {
     backgroundColor: "white",
@@ -225,7 +139,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginHorizontal: 8,
   },
+  icon: {
+    color: "black",
+  },
 });
 
-}
 export default HomeScreen;
